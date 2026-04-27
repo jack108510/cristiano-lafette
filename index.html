@@ -2,91 +2,96 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Cristiano Lafette</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Inter',sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Inter',sans-serif;color:#e8e0d4;-webkit-font-smoothing:antialiased}
 
-/* Intro overlay */
-.intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity 1s}
+/* Intro */
+.intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity 1.2s ease}
 .intro.hidden{opacity:0;pointer-events:none}
-.intro h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,8vw,6rem);font-weight:900;color:#e8e0d4;letter-spacing:6px;text-align:center;animation:fadeIn 2s ease}
-.intro .sub{font-size:.8rem;letter-spacing:4px;text-transform:uppercase;color:#c8a97e;margin-top:20px;opacity:0;animation:fadeIn 1.5s ease .8s forwards}
-.intro .enter{margin-top:60px;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);animation:pulse 2s infinite}
-@keyframes fadeIn{to{opacity:1}}
-@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.5}}
+.intro h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,8vw,6rem);font-weight:900;color:#e8e0d4;letter-spacing:8px;text-align:center;line-height:1.1;opacity:0;animation:fadeUp 1.5s ease forwards .3s}
+.intro .sub{font-size:.75rem;letter-spacing:5px;text-transform:uppercase;color:#c8a97e;margin-top:24px;opacity:0;animation:fadeUp 1.2s ease forwards 1s}
+.intro .enter{margin-top:60px;font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.2);animation:breathe 2.5s ease infinite}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes breathe{0%,100%{opacity:.15}50%{opacity:.4}}
 
-/* Room viewer */
-.room{position:fixed;inset:0;display:none}
-.room.active{display:block}
-.room-bg{width:100%;height:100%;object-fit:cover;transition:transform .1s ease-out;transform-origin:center center;cursor:grab}
-.room-bg:active{cursor:grabbing}
+/* Room canvas */
+.room-viewport{position:fixed;inset:0;overflow:hidden}
+.room-layer{position:absolute;inset:0;will-change:transform;transition:none}
+.room-layer img{width:100%;height:100%;object-fit:cover;image-rendering:-webkit-optimize-contrast;transform:scale(1.08);pointer-events:none}
 
-/* Room vignette */
-.vignette{position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.6) 100%)}
+/* Depth layers for parallax */
+.depth-bg{position:absolute;inset:-40px;will-change:transform;pointer-events:none}
+.depth-bg img{width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:brightness(0.25) saturate(0.6) blur(2px)}
+
+/* Vignette */
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse 70% 70% at center,transparent 30%,rgba(0,0,0,0.7) 100%)}
+
+/* Room transition overlay */
+.transition-overlay{position:fixed;inset:0;z-index:15;background:#000;opacity:0;pointer-events:none;transition:opacity .6s ease}
+.transition-overlay.active{opacity:1}
 
 /* Room info */
-.room-info{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:40px 48px;background:linear-gradient(transparent,rgba(0,0,0,0.8))}
-.room-info h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#e8e0d4;letter-spacing:3px;margin-bottom:6px}
-.room-info p{font-size:.75rem;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase}
+.room-info{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:48px 48px 40px;background:linear-gradient(transparent,rgba(0,0,0,0.85) 70%);opacity:0;transform:translateY(10px);transition:all .8s ease}
+.room-info.visible{opacity:1;transform:translateY(0)}
+.room-info h2{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:700;letter-spacing:4px;margin-bottom:8px}
+.room-info .room-location{font-size:.7rem;color:rgba(255,255,255,0.35);letter-spacing:3px;text-transform:uppercase}
 
-/* Shop button */
-.shop-btn{position:fixed;bottom:100px;right:48px;z-index:30;display:flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);border-radius:8px;color:#c8a97e;font-size:.7rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s;backdrop-filter:blur(10px)}
-.shop-btn:hover{background:rgba(200,169,126,0.25);border-color:rgba(200,169,126,0.5);transform:translateY(-2px)}
-.shop-btn svg{width:18px;height:18px;stroke:#c8a97e;fill:none;stroke-width:1.5}
+/* Nav arrows */
+.nav-btn{position:fixed;top:50%;z-index:30;transform:translateY(-50%);width:56px;height:56px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.08);border-radius:50%;cursor:pointer;opacity:0;transition:all .4s ease;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px)}
+.nav-btn.visible{opacity:.3}
+.nav-btn:hover{opacity:1;border-color:rgba(200,169,126,0.3);background:rgba(200,169,126,0.08)}
+.nav-btn:active{transform:translateY(-50%) scale(.92)}
+.nav-btn.left{left:28px}
+.nav-btn.right{right:28px}
+.nav-btn svg{width:20px;height:20px;stroke:rgba(255,255,255,0.6);stroke-width:1.5;fill:none}
 
-/* Product panel */
-.product-panel{position:fixed;top:0;right:-400px;width:380px;height:100%;z-index:100;background:rgba(15,13,11,0.95);backdrop-filter:blur(30px);border-left:1px solid rgba(200,169,126,0.1);transition:right .5s cubic-bezier(.22,1,.36,1);overflow-y:auto;padding:80px 32px 32px}
-.product-panel.open{right:0}
-.product-panel .close{position:absolute;top:24px;right:24px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:1.2rem;transition:color .3s}
-.product-panel .close:hover{color:#fff}
-.product-panel .panel-title{font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:3px;text-transform:uppercase;color:#c8a97e;margin-bottom:32px}
-.product-card{margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;cursor:pointer;transition:all .3s}
-.product-card:hover{background:rgba(255,255,255,0.06);border-color:rgba(200,169,126,0.2)}
-.product-card .pc-img{width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;margin-bottom:12px;position:relative}
-.product-card .pc-img img{width:100%;height:100%;object-fit:cover;filter:brightness(0.7) saturate(0.8)}
-.product-card .pc-img .pc-badge{position:absolute;top:8px;left:8px;background:rgba(200,169,126,0.2);color:#c8a97e;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;padding:4px 8px;border-radius:4px;backdrop-filter:blur(4px)}
-.product-card .pc-name{font-weight:600;font-size:.9rem;color:#e8e0d4;margin-bottom:4px}
-.product-card .pc-desc{font-size:.7rem;color:rgba(255,255,255,0.35);margin-bottom:10px}
-.product-card .pc-bottom{display:flex;align-items:center;justify-content:space-between}
-.product-card .pc-price{font-family:'Playfair Display',serif;font-size:1.1rem;color:#c8a97e;font-weight:700}
-.product-card .pc-buy{padding:8px 18px;background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);border-radius:6px;color:#c8a97e;font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.product-card .pc-buy:hover{background:rgba(200,169,126,0.3);border-color:rgba(200,169,126,0.5)}
-
-/* Overlay when panel open */
-.panel-overlay{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity .4s}
-.panel-overlay.open{opacity:1;pointer-events:auto}
-
-/* Navigation arrows */
-.nav-arrow{position:fixed;top:50%;z-index:30;width:50px;height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.3;transition:opacity .3s,transform .3s}
-.nav-arrow:hover{opacity:1;transform:scale(1.1)}
-.nav-arrow.left{left:24px;transform:translateY(-50%)}
-.nav-arrow.left:hover{transform:translateY(-50%) scale(1.1)}
-.nav-arrow.right{right:24px;transform:translateY(-50%)}
-.nav-arrow.right:hover{transform:translateY(-50%) scale(1.1)}
-.nav-arrow svg{width:24px;height:24px;stroke:#e8e0d4;stroke-width:1.5;fill:none}
-
-/* Room counter */
-.counter{position:fixed;top:32px;right:48px;z-index:30;font-size:.7rem;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase}
+/* Counter */
+.counter{position:fixed;top:36px;right:48px;z-index:30;font-size:.65rem;letter-spacing:3px;color:rgba(255,255,255,0.2);text-transform:uppercase;opacity:0;transition:opacity .8s ease}
+.counter.visible{opacity:1}
 
 /* Logo */
-.logo-fixed{position:fixed;top:32px;left:48px;z-index:30;font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(232,224,212,0.5)}
+.logo{position:fixed;top:36px;left:48px;z-index:30;font-family:'Playfair Display',serif;font-size:.8rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(232,224,212,0.4);opacity:0;transition:opacity .8s ease}
+.logo.visible{opacity:1}
 
-/* Room transition */
-.room.transitioning{animation:roomIn .8s ease}
-@keyframes roomIn{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:scale(1)}}
+/* Shop button */
+.shop-btn{position:fixed;bottom:36px;right:48px;z-index:30;display:flex;align-items:center;gap:10px;padding:12px 24px;border:1px solid rgba(200,169,126,0.15);border-radius:8px;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);cursor:pointer;opacity:0;transition:all .4s ease}
+.shop-btn.visible{opacity:.6}
+.shop-btn:hover{opacity:1;border-color:rgba(200,169,126,0.35);transform:translateY(-2px)}
+.shop-btn span{font-size:.65rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:#c8a97e}
+.shop-btn svg{width:16px;height:16px;stroke:#c8a97e;fill:none;stroke-width:1.5}
+
+/* Product panel */
+.panel-bg{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity .5s;backdrop-filter:blur(4px)}
+.panel-bg.open{opacity:1;pointer-events:auto}
+.product-panel{position:fixed;top:0;right:0;width:380px;max-width:90vw;height:100%;z-index:100;background:rgba(12,10,8,0.97);border-left:1px solid rgba(200,169,126,0.08);transform:translateX(100%);transition:transform .5s cubic-bezier(.22,1,.36,1);overflow-y:auto;padding:0}
+.product-panel.open{transform:translateX(0)}
+.product-panel .panel-head{padding:28px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center}
+.product-panel .panel-title{font-family:'Playfair Display',serif;font-size:.85rem;letter-spacing:3px;text-transform:uppercase;color:#c8a97e}
+.product-panel .close-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.3);font-size:1.2rem;transition:color .3s}
+.product-panel .close-btn:hover{color:#fff}
+.product-card{padding:24px 28px;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:background .3s}
+.product-card:hover{background:rgba(200,169,126,0.04)}
+.product-card .pc-name{font-weight:600;font-size:.9rem;margin-bottom:4px}
+.product-card .pc-desc{font-size:.7rem;color:rgba(255,255,255,0.3);margin-bottom:12px;letter-spacing:.5px}
+.product-card .pc-bottom{display:flex;align-items:center;justify-content:space-between}
+.product-card .pc-price{font-family:'Playfair Display',serif;font-size:1.1rem;color:#c8a97e;font-weight:700}
+.product-card .pc-buy{padding:8px 18px;border:1px solid rgba(200,169,126,0.2);border-radius:6px;background:transparent;color:#c8a97e;font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s;font-family:'Inter',sans-serif}
+.product-card .pc-buy:hover{background:rgba(200,169,126,0.12);border-color:rgba(200,169,126,0.4)}
 
 /* Mobile */
 @media(max-width:768px){
-.room-info{padding:24px}
-.room-info h2{font-size:1.3rem}
-.nav-arrow{width:36px;height:60px}
-.nav-arrow.left{left:8px}
-.nav-arrow.right{right:8px}
-.logo-fixed{top:20px;left:20px;font-size:.7rem}
+.nav-btn{width:44px;height:44px}
+.nav-btn.left{left:12px}
+.nav-btn.right{right:12px}
+.logo{top:20px;left:20px;font-size:.65rem}
 .counter{top:20px;right:20px}
+.room-info{padding:28px 24px 28px}
+.shop-btn{bottom:20px;right:20px;padding:10px 18px}
+.product-panel{width:100%;max-width:100%}
 }
 </style>
 </head>
@@ -99,202 +104,216 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'In
 </div>
 
 <div class="vignette"></div>
-<div class="logo-fixed">Cristiano Lafette</div>
-<div class="counter"><span id="current">1</span> / <span id="total">6</span></div>
+<div class="transition-overlay" id="transOverlay"></div>
+<div class="logo" id="logo">Cristiano Lafette</div>
+<div class="counter" id="counter"><span id="cur">1</span> / <span id="tot">6</span></div>
 
-<div class="nav-arrow left" onclick="prev()">
+<div class="nav-btn left" id="navLeft" onclick="go(-1)">
   <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
 </div>
-<div class="nav-arrow right" onclick="next()">
+<div class="nav-btn right" id="navRight" onclick="go(1)">
   <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
 </div>
 
-<div class="room-info">
-  <h2 id="roomTitle">The Yacht</h2>
-  <p id="roomSub">Mediterranean Coast — Deck Lounge</p>
+<div class="room-info" id="roomInfo">
+  <h2 id="roomTitle"></h2>
+  <div class="room-location" id="roomLoc"></div>
 </div>
 
-<div class="shop-btn" onclick="togglePanel()">
+<div class="shop-btn" id="shopBtn" onclick="toggleShop()">
   <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-  Shop This Room
+  <span>Shop</span>
 </div>
 
-<div class="panel-overlay" id="panelOverlay" onclick="togglePanel()"></div>
-<div class="product-panel" id="productPanel">
-  <div class="close" onclick="togglePanel()">&times;</div>
-  <div class="panel-title">From This Room</div>
-  <div id="productCards"></div>
+<div class="panel-bg" id="panelBg" onclick="toggleShop()"></div>
+<div class="product-panel" id="panel">
+  <div class="panel-head">
+    <div class="panel-title">From This Room</div>
+    <div class="close-btn" onclick="toggleShop()">&times;</div>
+  </div>
+  <div id="products"></div>
 </div>
 
-<div id="roomContainer"></div>
+<div class="room-viewport" id="viewport"></div>
 
 <script>
 const ROOMS=[
-  {img:'photos/1.jpg',title:'The Yacht',sub:'Mediterranean Coast — Deck Lounge',
-   products:[
-     {name:'The Yacht Candle',desc:'Teak, Sea Salt, Bergamot',price:'$75',img:'photos/1.jpg'},
-     {name:'The Lafette Lighter',desc:'Matte Black — Torch Flame',price:'$95',img:'photos/2.jpg'},
-   ]},
-  {img:'photos/2.jpg',title:'Private Jet',sub:'Gulfstream G650 — Cabin Suite',
-   products:[
-     {name:'The Jet Candle',desc:'Oud, Leather, Amber',price:'$75',img:'photos/2.jpg'},
-     {name:'His Pyjamas',desc:'Silk Set — Charcoal',price:'$150',img:'photos/5.jpg'},
-   ]},
-  {img:'photos/3.jpg',title:'Oceanfront Villa',sub:'Caribbean — Sunset Terrace',
-   products:[
-     {name:'The Villa Candle',desc:'Coconut, Tiare, Vanilla',price:'$75',img:'photos/3.jpg'},
-     {name:'The Matching Set',desc:'His & Hers Pyjamas',price:'$275',img:'photos/5.jpg'},
-   ]},
-  {img:'photos/4.jpg',title:'The Penthouse',sub:'Manhattan — Infinity Pool',
-   products:[
-     {name:'The Penthouse Candle',desc:'Neroli, Vetiver, Musk',price:'$75',img:'photos/4.jpg'},
-     {name:'The Lafette Lighter',desc:'Brushed Gold — Torch Flame',price:'$95',img:'photos/4.jpg'},
-   ]},
-  {img:'photos/5.jpg',title:'The Suite',sub:'Lake Como — Master Bedroom',
-   products:[
-     {name:'His Pyjamas',desc:'Silk Set — Ivory',price:'$150',img:'photos/5.jpg'},
-     {name:'Her Pyjamas',desc:'Silk Crop + Shorts — Ivory',price:'$150',img:'photos/5.jpg'},
-   ]},
-  {img:'photos/6.jpg',title:'Mountain Lodge',sub:'Swiss Alps — Living Room',
-   products:[
-     {name:'The Lodge Candle',desc:'Cedar, Smoke, Leather',price:'$75',img:'photos/6.jpg'},
-     {name:'The Evening Set',desc:'His + Hers + Candle + Lighter',price:'$350',img:'photos/6.jpg'},
-   ]},
+  {img:'photos/1.jpg',title:'The Yacht',loc:'Mediterranean Coast — Deck Lounge',products:[
+    {name:'The Yacht Candle',desc:'Teak · Sea Salt · Bergamot',price:'$75'},
+    {name:'The Lafette Lighter',desc:'Matte Black — Torch Flame',price:'$95'},
+  ]},
+  {img:'photos/2.jpg',title:'Private Jet',loc:'Gulfstream G650 — Cabin Suite',products:[
+    {name:'The Jet Candle',desc:'Oud · Leather · Amber',price:'$75'},
+    {name:'His Pyjamas',desc:'Silk Set — Charcoal',price:'$150'},
+  ]},
+  {img:'photos/3.jpg',title:'Oceanfront Villa',loc:'Caribbean — Sunset Terrace',products:[
+    {name:'The Villa Candle',desc:'Coconut · Tiare · Vanilla',price:'$75'},
+    {name:'The Matching Set',desc:'His & Hers Pyjamas',price:'$275'},
+  ]},
+  {img:'photos/4.jpg',title:'The Penthouse',loc:'Manhattan — Infinity Pool',products:[
+    {name:'The Penthouse Candle',desc:'Neroli · Vetiver · Musk',price:'$75'},
+    {name:'The Lafette Lighter',desc:'Brushed Gold — Torch Flame',price:'$95'},
+  ]},
+  {img:'photos/5.jpg',title:'The Suite',loc:'Lake Como — Master Bedroom',products:[
+    {name:'His Pyjamas',desc:'Silk Set — Ivory',price:'$150'},
+    {name:'Her Pyjamas',desc:'Silk Crop + Shorts — Ivory',price:'$150'},
+  ]},
+  {img:'photos/6.jpg',title:'Mountain Lodge',loc:'Swiss Alps — Living Room',products:[
+    {name:'The Lodge Candle',desc:'Cedar · Smoke · Leather',price:'$75'},
+    {name:'The Evening Set',desc:'His + Hers + Candle + Lighter',price:'$350'},
+  ]},
 ];
 
-let current=0;
-let dragging=false,startX=0,startY=0,tx=0,ty=0;
-const container=document.getElementById('roomContainer');
+let cur=0, transitioning=false, entered=false;
+let mouseX=0.5, mouseY=0.5;
+let layers=[];
 
-function buildRoom(idx){
-  const r=document.createElement('div');
-  r.className='room';
-  r.id='room-'+idx;
-  const img=document.createElement('img');
-  img.className='room-bg';
-  img.src=ROOMS[idx].img;
-  img.draggable=false;
-  r.appendChild(img);
-  container.appendChild(r);
-  return r;
+// Build room layers
+const vp=document.getElementById('viewport');
+ROOMS.forEach((r,i)=>{
+  const div=document.createElement('div');
+  div.className='room-layer';
+  div.style.opacity=i===0?'1':'0';
+  div.innerHTML=`<img src="${r.img}" alt="${r.title}" draggable="false">`;
+  div.style.transition='opacity .8s ease';
+  vp.appendChild(div);
+  layers.push(div);
+});
+
+document.getElementById('tot').textContent=ROOMS.length;
+
+function enter(){
+  entered=true;
+  document.getElementById('intro').classList.add('hidden');
+  setTimeout(()=>{
+    document.getElementById('logo').classList.add('visible');
+    document.getElementById('counter').classList.add('visible');
+    document.getElementById('navLeft').classList.add('visible');
+    document.getElementById('navRight').classList.add('visible');
+    document.getElementById('shopBtn').classList.add('visible');
+    showRoom(0);
+  },600);
 }
 
-// Preload all rooms
-ROOMS.forEach((_,i)=>buildRoom(i));
-document.getElementById('total').textContent=ROOMS.length;
-
-function showRoom(idx,dir){
-  document.querySelectorAll('.room').forEach(r=>r.classList.remove('active'));
-  const room=document.getElementById('room-'+idx);
-  room.classList.add('active','transitioning');
-  setTimeout(()=>room.classList.remove('transitioning'),800);
+function showRoom(idx){
+  cur=idx;
+  document.getElementById('cur').textContent=idx+1;
   
-  document.getElementById('roomTitle').textContent=ROOMS[idx].title;
-  document.getElementById('roomSub').textContent=ROOMS[idx].sub;
-  document.getElementById('current').textContent=idx+1;
+  // Fade info out then in
+  const info=document.getElementById('roomInfo');
+  info.classList.remove('visible');
+  
+  // Show room info with delay
+  setTimeout(()=>{
+    document.getElementById('roomTitle').textContent=ROOMS[idx].title;
+    document.getElementById('roomLoc').textContent=ROOMS[idx].loc;
+    info.classList.add('visible');
+  },400);
   
   // Render products
-  const cards=document.getElementById('productCards');
-  const products=ROOMS[idx].products||[];
-  cards.innerHTML=products.map(p=>`
+  const prods=document.getElementById('products');
+  prods.innerHTML=ROOMS[idx].products.map(p=>`
     <div class="product-card">
-      <div class="pc-img"><img src="${p.img}" alt="${p.name}"><div class="pc-badge">Cristiano Lafette</div></div>
       <div class="pc-name">${p.name}</div>
       <div class="pc-desc">${p.desc}</div>
       <div class="pc-bottom">
         <div class="pc-price">${p.price}</div>
-        <button class="pc-buy" onclick="alert('Coming soon — Cristiano Lafette')">Purchase</button>
+        <button class="pc-buy" onclick="event.stopPropagation();alert('Coming soon')">Purchase</button>
       </div>
     </div>
   `).join('');
+}
+
+function go(dir){
+  if(transitioning) return;
+  transitioning=true;
   
-  // Close panel if open
-  document.getElementById('productPanel').classList.remove('open');
-  document.getElementById('panelOverlay').classList.remove('open');
+  const next=(cur+dir+ROOMS.length)%ROOMS.length;
+  const overlay=document.getElementById('transOverlay');
   
-  // Reset pan
-  const img=room.querySelector('.room-bg');
-  img.style.transform='scale(1.15)';
-  tx=0;ty=0;
+  // Fade to black
+  overlay.classList.add('active');
+  
+  setTimeout(()=>{
+    // Swap layers
+    layers.forEach((l,i)=>l.style.opacity=i===next?'1':'0');
+    showRoom(next);
+    
+    // Fade from black
+    setTimeout(()=>{
+      overlay.classList.remove('active');
+      setTimeout(()=>transitioning=false,600);
+    },200);
+  },600);
 }
 
-function togglePanel(){
-  document.getElementById('productPanel').classList.toggle('open');
-  document.getElementById('panelOverlay').classList.toggle('open');
+function toggleShop(){
+  document.getElementById('panel').classList.toggle('open');
+  document.getElementById('panelBg').classList.toggle('open');
 }
 
-function next(){
-  current=(current+1)%ROOMS.length;
-  showRoom(current,1);
-}
-function prev(){
-  current=(current-1+ROOMS.length)%ROOMS.length;
-  showRoom(current,-1);
-}
+// Smooth mouse parallax
+let targetX=0.5, targetY=0.5, currentX=0.5, currentY=0.5;
+const PARALLAX_X=30, PARALLAX_Y=15;
 
-function enter(){
-  document.getElementById('intro').classList.add('hidden');
-  showRoom(0);
-}
-
-// Pan/drag to look around
-container.addEventListener('mousedown',e=>{
-  dragging=true;startX=e.clientX-tx;startY=e.clientY-ty;
+document.addEventListener('mousemove',e=>{
+  targetX=e.clientX/window.innerWidth;
+  targetY=e.clientY/window.innerHeight;
 });
-window.addEventListener('mousemove',e=>{
-  if(!dragging)return;
-  const room=document.getElementById('room-'+current);
-  const img=room?.querySelector('.room-bg');
-  if(!img)return;
-  tx=e.clientX-startX;
-  ty=e.clientY-startY;
-  // Limit pan range
-  tx=Math.max(-200,Math.min(200,tx));
-  ty=Math.max(-100,Math.min(100,ty));
-  img.style.transform=`scale(1.15) translate(${tx*0.3}px,${ty*0.3}px)`;
-});
-window.addEventListener('mouseup',()=>{dragging=false});
 
-// Touch support
-let touchStartX=0,touchDelta=0;
-container.addEventListener('touchstart',e=>{
-  touchStartX=e.touches[0].clientX;
-  touchDelta=0;
+// Touch parallax
+document.addEventListener('touchmove',e=>{
+  targetX=e.touches[0].clientX/window.innerWidth;
+  targetY=e.touches[0].clientY/window.innerHeight;
 },{passive:true});
-container.addEventListener('touchmove',e=>{
-  touchDelta=e.touches[0].clientX-touchStartX;
-  const room=document.getElementById('room-'+current);
-  const img=room?.querySelector('.room-bg');
-  if(!img)return;
-  const pan=Math.max(-150,Math.min(150,touchDelta*0.5));
-  img.style.transform=`scale(1.15) translateX(${pan}px)`;
-},{passive:true});
-container.addEventListener('touchend',()=>{
-  if(Math.abs(touchDelta)>80){
-    if(touchDelta<0)next();else prev();
-  }else{
-    // Snap back
-    const room=document.getElementById('room-'+current);
-    const img=room?.querySelector('.room-bg');
-    if(img)img.style.transform='scale(1.15)';
+
+function animate(){
+  // Smooth interpolation
+  currentX+=(targetX-currentX)*0.04;
+  currentY+=(targetY-currentY)*0.04;
+  
+  const offsetX=((currentX-0.5)*PARALLAX_X);
+  const offsetY=((currentY-0.5)*PARALLAX_Y);
+  
+  layers.forEach(l=>{
+    if(l.style.opacity==='1'){
+      const img=l.querySelector('img');
+      img.style.transform=`scale(1.08) translate(${offsetX}px,${offsetY}px)`;
+    }
+  });
+  
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(!entered)return;
+  if(e.key==='ArrowRight')go(1);
+  if(e.key==='ArrowLeft')go(-1);
+  if(e.key==='Escape'){
+    document.getElementById('panel').classList.remove('open');
+    document.getElementById('panelBg').classList.remove('open');
   }
 });
 
-// Keyboard nav
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key==='d')next();
-  if(e.key==='ArrowLeft'||e.key==='a')prev();
-  if(e.key==='Enter'&&document.getElementById('intro').classList.contains('hidden')===false)enter();
-});
-
-// Scroll wheel to navigate
-let wheelCooldown=false;
+// Wheel with cooldown
+let wheelLock=false;
 window.addEventListener('wheel',e=>{
-  if(wheelCooldown)return;
-  wheelCooldown=true;
-  setTimeout(()=>wheelCooldown=false,800);
-  if(e.deltaY>0)next();else prev();
+  if(!entered||wheelLock||transitioning)return;
+  wheelLock=true;
+  setTimeout(()=>wheelLock=false,1200);
+  go(e.deltaY>0?1:-1);
 },{passive:true});
+
+// Swipe
+let swipeX=0;
+document.addEventListener('touchstart',e=>{swipeX=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(!entered)return;
+  const dx=e.changedTouches[0].clientX-swipeX;
+  if(Math.abs(dx)>60)go(dx<0?1:-1);
+});
 </script>
 </body>
 </html>
