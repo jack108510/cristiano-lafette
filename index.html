@@ -5,153 +5,209 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cristiano Lafette</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:#0a0a0a;color:#e8e0d4;font-family:'Inter',sans-serif;overflow-x:hidden}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Inter',sans-serif}
 
-/* Nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:28px 48px;transition:all .4s}
-nav.scrolled{padding:16px 48px;background:rgba(10,10,10,0.9);backdrop-filter:blur(20px)}
-nav .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#e8e0d4}
-nav .links{display:flex;gap:32px;align-items:center}
-nav .links a{color:#e8e0d4;text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;opacity:.6;transition:opacity .3s}
-nav .links a:hover{opacity:1}
+/* Intro overlay */
+.intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity 1s}
+.intro.hidden{opacity:0;pointer-events:none}
+.intro h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,8vw,6rem);font-weight:900;color:#e8e0d4;letter-spacing:6px;text-align:center;animation:fadeIn 2s ease}
+.intro .sub{font-size:.8rem;letter-spacing:4px;text-transform:uppercase;color:#c8a97e;margin-top:20px;opacity:0;animation:fadeIn 1.5s ease .8s forwards}
+.intro .enter{margin-top:60px;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);animation:pulse 2s infinite}
+@keyframes fadeIn{to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.5}}
 
-/* Hero */
-.hero{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background:url('photos/1.jpg') center/cover no-repeat;filter:brightness(0.35);transform:scale(1.05);transition:transform 8s ease-out}
-.hero:hover .hero-bg{transform:scale(1)}
-.hero-content{position:relative;z-index:2;text-align:center;padding:0 24px}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(3rem,10vw,8rem);font-weight:900;letter-spacing:8px;line-height:1;opacity:0;animation:fadeUp 1.2s ease forwards .3s}
-.hero .tagline{font-size:clamp(.75rem,1.5vw,1rem);letter-spacing:6px;text-transform:uppercase;opacity:0;margin-top:20px;animation:fadeUp 1s ease forwards .8s;color:#c8a97e}
-.hero .scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);opacity:0;animation:fadeUp 1s ease forwards 1.5s}
-.hero .scroll-hint span{display:block;width:1px;height:40px;background:linear-gradient(transparent,#c8a97e);margin:0 auto}
+/* Room viewer */
+.room{position:fixed;inset:0;display:none}
+.room.active{display:block}
+.room-bg{width:100%;height:100%;object-fit:cover;transition:transform .1s ease-out;transform-origin:center center;cursor:grab}
+.room-bg:active{cursor:grabbing}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+/* Room vignette */
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:10;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.6) 100%)}
 
-/* Gallery Grid */
-.gallery{padding:0 48px 120px}
-.gallery-row{display:grid;gap:4px;margin-bottom:4px}
-.gallery-row.r2{grid-template-columns:1fr 1fr}
-.gallery-row.r3{grid-template-columns:1fr 1fr 1fr}
-.gallery-item{position:relative;overflow:hidden;aspect-ratio:4/5;cursor:pointer}
-.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease,filter .5s;filter:brightness(0.8) saturate(0.9)}
-.gallery-item:hover img{transform:scale(1.05);filter:brightness(1) saturate(1)}
-.gallery-item .overlay{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(10,10,10,0.7));opacity:0;transition:opacity .4s}
-.gallery-item:hover .overlay{opacity:1}
-.gallery-item .label{position:absolute;bottom:24px;left:24px;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;opacity:0;transform:translateY(10px);transition:all .4s}
-.gallery-item:hover .label{opacity:1;transform:translateY(0)}
+/* Room info */
+.room-info{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:40px 48px;background:linear-gradient(transparent,rgba(0,0,0,0.8))}
+.room-info h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#e8e0d4;letter-spacing:3px;margin-bottom:6px}
+.room-info p{font-size:.75rem;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase}
 
-/* Full-width section */
-.section-full{height:80vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.section-full .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(0.3)}
-.section-full .content{position:relative;z-index:2;text-align:center;max-width:700px;padding:0 24px}
-.section-full h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,4rem);font-weight:900;letter-spacing:4px;margin-bottom:16px}
-.section-full p{font-size:1rem;line-height:1.8;opacity:.7;letter-spacing:1px}
+/* Navigation arrows */
+.nav-arrow{position:fixed;top:50%;z-index:30;width:50px;height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.3;transition:opacity .3s,transform .3s}
+.nav-arrow:hover{opacity:1;transform:scale(1.1)}
+.nav-arrow.left{left:24px;transform:translateY(-50%)}
+.nav-arrow.left:hover{transform:translateY(-50%) scale(1.1)}
+.nav-arrow.right{right:24px;transform:translateY(-50%)}
+.nav-arrow.right:hover{transform:translateY(-50%) scale(1.1)}
+.nav-arrow svg{width:24px;height:24px;stroke:#e8e0d4;stroke-width:1.5;fill:none}
 
-/* Footer */
-footer{padding:60px 48px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center}
-footer .logo{font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:3px;text-transform:uppercase;opacity:.4}
-footer .social{display:flex;gap:24px}
-footer .social a{color:#e8e0d4;text-decoration:none;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;opacity:.3;transition:opacity .3s}
-footer .social a:hover{opacity:1}
+/* Room counter */
+.counter{position:fixed;top:32px;right:48px;z-index:30;font-size:.7rem;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase}
+
+/* Logo */
+.logo-fixed{position:fixed;top:32px;left:48px;z-index:30;font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(232,224,212,0.5)}
+
+/* Room transition */
+.room.transitioning{animation:roomIn .8s ease}
+@keyframes roomIn{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:scale(1)}}
 
 /* Mobile */
 @media(max-width:768px){
-nav{padding:20px 24px}
-.gallery{padding:0 16px 80px}
-.gallery-row.r3{grid-template-columns:1fr 1fr}
-footer{flex-direction:column;gap:24px;text-align:center}
+.room-info{padding:24px}
+.room-info h2{font-size:1.3rem}
+.nav-arrow{width:36px;height:60px}
+.nav-arrow.left{left:8px}
+.nav-arrow.right{right:8px}
+.logo-fixed{top:20px;left:20px;font-size:.7rem}
+.counter{top:20px;right:20px}
 }
 </style>
 </head>
 <body>
 
-<nav id="nav">
-  <div class="logo">Cristiano Lafette</div>
-  <div class="links">
-    <a href="#gallery">Gallery</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-  </div>
-</nav>
-
-<div class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
-    <h1>CRISTIANO<br>LAFETTE</h1>
-    <div class="tagline">Luxury Living, Redefined</div>
-  </div>
-  <div class="scroll-hint"><span></span></div>
+<div class="intro" id="intro" onclick="enter()">
+  <h1>CRISTIANO<br>LAFETTE</h1>
+  <div class="sub">A Private Collection</div>
+  <div class="enter">Click to Enter</div>
 </div>
 
-<div class="gallery" id="gallery">
-  <div class="gallery-row r2">
-    <div class="gallery-item">
-      <img src="photos/2.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">Private Aviation</div>
-    </div>
-    <div class="gallery-item">
-      <img src="photos/3.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">Oceanfront Living</div>
-    </div>
-  </div>
-  <div class="gallery-row r3">
-    <div class="gallery-item">
-      <img src="photos/1.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">Yacht Life</div>
-    </div>
-    <div class="gallery-item">
-      <img src="photos/5.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">The Suite</div>
-    </div>
-    <div class="gallery-item">
-      <img src="photos/6.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">Mountain Retreat</div>
-    </div>
-  </div>
-  <div class="gallery-row r2">
-    <div class="gallery-item">
-      <img src="photos/4.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">Penthouse</div>
-    </div>
-    <div class="gallery-item">
-      <img src="photos/2.jpg" alt="">
-      <div class="overlay"></div>
-      <div class="label">The Collection</div>
-    </div>
-  </div>
+<div class="vignette"></div>
+<div class="logo-fixed">Cristiano Lafette</div>
+<div class="counter"><span id="current">1</span> / <span id="total">6</span></div>
+
+<div class="nav-arrow left" onclick="prev()">
+  <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+</div>
+<div class="nav-arrow right" onclick="next()">
+  <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
 </div>
 
-<div class="section-full" id="about">
-  <div class="bg" style="background-image:url('photos/3.jpg')"></div>
-  <div class="content">
-    <h2>THE LIFESTYLE</h2>
-    <p>Where comfort meets sophistication. Every space curated. Every detail intentional. Cristiano Lafette represents the pinnacle of refined living — from the Mediterranean coast to the alpine peaks.</p>
-  </div>
+<div class="room-info">
+  <h2 id="roomTitle">The Yacht</h2>
+  <p id="roomSub">Mediterranean Coast — Deck Lounge</p>
 </div>
 
-<footer id="contact">
-  <div class="logo">Cristiano Lafette &copy; 2026</div>
-  <div class="social">
-    <a href="#">Instagram</a>
-    <a href="#">Twitter</a>
-    <a href="#">Contact</a>
-  </div>
-</footer>
+<div id="roomContainer"></div>
 
 <script>
-// Nav scroll effect
-window.addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>80)
-})
+const ROOMS=[
+  {img:'photos/1.jpg',title:'The Yacht',sub:'Mediterranean Coast — Deck Lounge'},
+  {img:'photos/2.jpg',title:'Private Jet',sub:'Gulfstream G650 — Cabin Suite'},
+  {img:'photos/3.jpg',title:'Oceanfront Villa',sub:'Caribbean — Sunset Terrace'},
+  {img:'photos/4.jpg',title:'The Penthouse',sub:'Manhattan — Infinity Pool'},
+  {img:'photos/5.jpg',title:'The Suite',sub:'Lake Como — Master Bedroom'},
+  {img:'photos/6.jpg',title:'Mountain Lodge',sub:'Swiss Alps — Living Room'},
+];
+
+let current=0;
+let dragging=false,startX=0,startY=0,tx=0,ty=0;
+const container=document.getElementById('roomContainer');
+
+function buildRoom(idx){
+  const r=document.createElement('div');
+  r.className='room';
+  r.id='room-'+idx;
+  const img=document.createElement('img');
+  img.className='room-bg';
+  img.src=ROOMS[idx].img;
+  img.draggable=false;
+  r.appendChild(img);
+  container.appendChild(r);
+  return r;
+}
+
+// Preload all rooms
+ROOMS.forEach((_,i)=>buildRoom(i));
+document.getElementById('total').textContent=ROOMS.length;
+
+function showRoom(idx,dir){
+  document.querySelectorAll('.room').forEach(r=>r.classList.remove('active'));
+  const room=document.getElementById('room-'+idx);
+  room.classList.add('active','transitioning');
+  setTimeout(()=>room.classList.remove('transitioning'),800);
+  
+  document.getElementById('roomTitle').textContent=ROOMS[idx].title;
+  document.getElementById('roomSub').textContent=ROOMS[idx].sub;
+  document.getElementById('current').textContent=idx+1;
+  
+  // Reset pan
+  const img=room.querySelector('.room-bg');
+  img.style.transform='scale(1.15)';
+  tx=0;ty=0;
+}
+
+function next(){
+  current=(current+1)%ROOMS.length;
+  showRoom(current,1);
+}
+function prev(){
+  current=(current-1+ROOMS.length)%ROOMS.length;
+  showRoom(current,-1);
+}
+
+function enter(){
+  document.getElementById('intro').classList.add('hidden');
+  showRoom(0);
+}
+
+// Pan/drag to look around
+container.addEventListener('mousedown',e=>{
+  dragging=true;startX=e.clientX-tx;startY=e.clientY-ty;
+});
+window.addEventListener('mousemove',e=>{
+  if(!dragging)return;
+  const room=document.getElementById('room-'+current);
+  const img=room?.querySelector('.room-bg');
+  if(!img)return;
+  tx=e.clientX-startX;
+  ty=e.clientY-startY;
+  // Limit pan range
+  tx=Math.max(-200,Math.min(200,tx));
+  ty=Math.max(-100,Math.min(100,ty));
+  img.style.transform=`scale(1.15) translate(${tx*0.3}px,${ty*0.3}px)`;
+});
+window.addEventListener('mouseup',()=>{dragging=false});
+
+// Touch support
+let touchStartX=0,touchDelta=0;
+container.addEventListener('touchstart',e=>{
+  touchStartX=e.touches[0].clientX;
+  touchDelta=0;
+},{passive:true});
+container.addEventListener('touchmove',e=>{
+  touchDelta=e.touches[0].clientX-touchStartX;
+  const room=document.getElementById('room-'+current);
+  const img=room?.querySelector('.room-bg');
+  if(!img)return;
+  const pan=Math.max(-150,Math.min(150,touchDelta*0.5));
+  img.style.transform=`scale(1.15) translateX(${pan}px)`;
+},{passive:true});
+container.addEventListener('touchend',()=>{
+  if(Math.abs(touchDelta)>80){
+    if(touchDelta<0)next();else prev();
+  }else{
+    // Snap back
+    const room=document.getElementById('room-'+current);
+    const img=room?.querySelector('.room-bg');
+    if(img)img.style.transform='scale(1.15)';
+  }
+});
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='d')next();
+  if(e.key==='ArrowLeft'||e.key==='a')prev();
+  if(e.key==='Enter'&&document.getElementById('intro').classList.contains('hidden')===false)enter();
+});
+
+// Scroll wheel to navigate
+let wheelCooldown=false;
+window.addEventListener('wheel',e=>{
+  if(wheelCooldown)return;
+  wheelCooldown=true;
+  setTimeout(()=>wheelCooldown=false,800);
+  if(e.deltaY>0)next();else prev();
+},{passive:true});
 </script>
 </body>
 </html>
