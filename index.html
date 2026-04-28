@@ -137,9 +137,9 @@ const ROOMS=[
       {name:'The Matching Set',desc:'His & Hers Pyjamas',price:'$275'},
     ],
     newyork:[
-      {name:'The Lafette Lighter',desc:'Matte Black — Torch Flame',price:'$95'},
-      {name:'His Pyjamas',desc:'Silk Set — Charcoal',price:'$150'},
-      {name:'The Evening Set',desc:'His + Hers + Candle + Lighter',price:'$350'},
+      {name:'The Lafette Lighter',desc:'Matte Black — Torch Flame',price:'$95',img:'photos/newyork.jpg'},
+      {name:'His Pyjamas',desc:'Silk Set — Charcoal',price:'$150',img:'photos/newyork.jpg'},
+      {name:'The Evening Set',desc:'His + Hers + Candle + Lighter',price:'$350',img:'photos/newyork.jpg'},
     ],
     maldives:[
       {name:'The Ocean Candle',desc:'Sea Salt · Driftwood · Jasmine',price:'$75'},
@@ -184,6 +184,7 @@ function openProducts(location){
   const prods=document.getElementById('products');
   prods.innerHTML=products.map(p=>`
     <div class="product-card">
+      ${p.img?`<div style="width:100%;height:180px;border-radius:10px;overflow:hidden;margin-bottom:12px"><img src="${p.img}" style="width:100%;height:100%;object-fit:cover"></div>`:''}
       <div class="pc-name">${p.name}</div>
       <div class="pc-desc">${p.desc}</div>
       <div class="pc-bottom">
