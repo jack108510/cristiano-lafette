@@ -107,15 +107,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'In
   <div class="pin-label">Mediterranean</div>
   <div class="pin-dot"></div>
 </div>
-<div class="pin" style="left:36%;top:49%" onclick="openProducts('miami')">
+<div class="pin" style="left:36%;top:49%" onclick="openLocationPage('miami')">
   <div class="pin-label">Miami</div>
   <div class="pin-dot"></div>
 </div>
-<div class="pin" style="left:35%;top:39%" onclick="openProducts('newyork')">
+<div class="pin" style="left:35%;top:39%" onclick="openLocationPage('newyork')">
   <div class="pin-label">New York</div>
   <div class="pin-dot"></div>
 </div>
-<div class="pin" style="left:59%;top:47%" onclick="openProducts('maldives')">
+<div class="pin" style="left:59%;top:47%" onclick="openLocationPage('maldives')">
   <div class="pin-label">Maldives</div>
   <div class="pin-dot"></div>
 </div>
@@ -224,6 +224,18 @@ const LOCATION_PAGES = {
   mediterranean: {
     title: 'Mediterranean',
     images: ['photos/mediterranean-1.jpg', 'photos/mediterranean-2.jpg']
+  },
+  maldives: {
+    title: 'Maldives',
+    images: ['photos/maldives-1.jpg']
+  },
+  newyork: {
+    title: 'New York',
+    images: ['photos/newyork-1.jpg']
+  },
+  miami: {
+    title: 'Miami',
+    images: ['photos/miami-1.jpg']
   }
 };
 
